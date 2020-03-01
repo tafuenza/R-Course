@@ -1,0 +1,94 @@
+---
+title: "Aprendizaje Extra"
+author: "Tomás"
+date: "20 de febrero de 2020"
+output: word_document
+---
+
+install.package("dplyr")
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Aprendizaje Extra
+
+##Match() o %in%
+
+match(data$vector, names(integer))
+
+Funcion que me permite hacer un match entre los nombres de un int y sus valores, con las columnas de un dataframe.
+La funcion %in% realiza exactamente lo mismo que match (), solamente que me entrega TRUE or FALSE y no las posiciones.
+
+```{r match}
+data <- data.frame(Nombres = c('Tomas', 'Tomas', 'Tomas', 'Tomas', 'Martin', 'Martin', 'Martin', 'Martin'),
+                   Dias = c("2020-02-10", "2020-02-10", "2020-02-11", "2020-02-11", "2020-02-10", '2020-02-10',
+                            '2020-02-11', '2020-02-11'), Pasos = c(NA, 12, 13, 22, NA, 26, 42, 12))
+aux <- tapply(data$Pasos,data$Nombres, mean, na.rm = TRUE); aux ; cat("Los names son", names(aux))
+aux2 <- match(data$Nombres, names(aux)) ; cat("Las posiciones que hacen match son", aux2)
+aux3 <- data$Nombres %in% names(aux)
+cat("Los valores para esas posiciones son", aux[aux2])
+```
+
+##Coalesce()
+
+data$vector <- coalesce(data$vector1, data$vector2)
+
+La funcion permite reemplazar los valores de un vector en otro, cuando encuentre en a valores NA.
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+```
+
+```{r Coalesce}
+data <- data.frame( a = c(1,NA,NA,5), b = c(1,3,6,4))
+aux <- coalesce(data$a,data$b); cat("El nuevo vector queda de la forma", aux)
+data$a <- aux ; head(data$a) #Sustituyo el vector
+```
+
+##ymd()
+
+La funcion permite facilmente pasar una fecha a formato date.
+
+```{r}
+library(lubridate)
+date <- "2012-04-11"
+class(date)
+date <- ymd(date)
+class(date)
+```
+
+##table()
+
+La funcion table permite contar cuantas veces se repite alguna observacion basado en una columna
+
+```{r}
+ayuda <- data.frame("a" = c("Hola","Hola","Chao","Como"), 'b' = c(2,2,3,4))
+tabla <- table(ayuda$a); cat("Las palabras de la columna a se repiten:", names(tabla), tabla)
+```
+
+##Grafico de barra con mas de una variable
+
+```{r}
+data <- data.frame("Plataforma" = c("Switch", "PS4", "Xbox"), "Precio en USD" = c(200,100,50),
+                   "Precio en CLP" = c(300,200,100), "Precio en ROCA" = c(20,10,5)); data
+```
+
+Para generar el grafico debo cambiar la forma en la que estan dispuesto los datos de manera vertical
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(tidyr)
+```
+```{r}
+data2 <- data %>% gather(Precio, Value, -Plataforma); data2
+```
+
+Ahora puedo crear mi grafico de barras con mas variables
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+```
+```{r}
+ggplot(data2, aes(x = Precio, y = Value, fill = Plataforma)) + geom_col(position = "dodge") + 
+        theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+        scale_fill_manual(values=c("red", "#E69F00", "#56B4E9"))
+```

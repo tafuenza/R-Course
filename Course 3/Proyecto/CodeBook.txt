@@ -1,0 +1,10 @@
+The data observed in this project are those provided by an accelerometer that measures variables for 30 subjects performing 6 activities:
+The activities are:
+- Walking
+- Walking UP_Stairs
+- Walking Down_Stairs
+- Sitting
+- Laying
+- Standing
+
+All the variables that measured the average and the standard deviation were analyzed.

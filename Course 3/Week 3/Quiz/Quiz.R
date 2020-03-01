@@ -1,0 +1,6 @@
+data1 <- read.csv("getdata_data_EDSTATS_Country.csv")
+data2 <- read.csv("getdata_data_GDP.csv")
+head(data1)
+head(data2)
+data3 <- merge(data1,data2, by.x = "CountryCode", by.y = "X")
+data3 <- arrange(data3,X.3)

@@ -1,0 +1,183 @@
+---
+title: "Week 3"
+author: "Tomás"
+date: "8 de noviembre de 2019"
+output:
+  word_document: default
+---
+### lapply
+
+lapply() aplica una funcion a una lista.
+recibe 3 argumentos: 
+
+* Una lista (x)
+* Una funcion (FUN)
+* Otros argumentos (...).
+* Estos (...) son generalmente los argumentos que se necesitan para que la funcion (FUN) sea usada correctamente.
+
+```{r f lapply, eval = FALSE}
+lapply(x,FUN,...)
+```
+
+#### Ejemplo 1:
+
+```{r ejemplo 1 lapply}
+x <- list(a = 1:5, b=rnorm(10))
+lapply(x,mean)
+```
+
+---
+
+#### sapply
+
+Es una version mejorada de lapply que busca simplificar el retorno de la funcion lapply
+
+```{r f sapply, eval = FALSE}
+sapply(x,FUN,...)
+```
+
+* Si el retorno de la funcion de una lista de elementos de longitud 1, entrega un vector
+* Si el retorno es una lista de la misma longitud cada una entrega una matriz
+* Si no encuentra una forma mas eficiente, retornara una lista tal cual lapply
+
+#### Ejemplo 1:
+
+```{r ejemplo 1 sapply}
+x <- list(a = 1:5, b=rnorm(10), c = rnorm(20,1) ,d = rnorm(100,5))
+sapply(x,mean)
+class(sapply(x,mean))
+```
+
+---
+
+### apply
+
+apply() aplica una funcion a una dimension especifica de un array
+Recibe 3 argumentos: 
+
+* Un array (x) [Vector,matriz]
+* MARGIN indica que dimension queremos "mantener" (1 filas, 2 columnas)
+* La funcion (FUN) que se quiere aplicar
+* otros argumentos (...)
+
+```{r f apply, eval = FALSE}
+apply(x,MARGIN,FUN,...)
+```
+
+#### Ejemplo 1:
+
+```{r ejemplo 1 apply}
+x <- matrix(rnorm(200),20,10)
+apply(x,2,mean)
+apply(x,1,sum)
+```
+
+##### Ojo:
+
+Las funciones de sumar/promediar columnas puede ser utilizadas directamente (son mas eficientes):
+
+```{r Funciones directas, eval = FALSE}
+rowSums()
+rowMeans()
+colSums()
+colMeans()
+```
+
+---
+
+#### tapply
+
+tapply() aplica una funcion a una parte especifica de un vector.
+Recibe 4 argumentos: 
+
+* Un vector (x)
+* INDEX un vector de la misma longitud que x que identifica las posiciones a aplicar
+* Una funcion (FUN) que se quiere aplicar
+* Finalmente otros argumentos (...)
+
+
+```{r f tapply, eval = FALSE}
+tapply(x,INDEX,FUN,...,simplify)
+```
+
+#### Ejemplo 1:
+
+```{r ejemplo 1 tapply}
+x <- c(rnorm(10),runif(10),rnorm(10))
+f <- gl(3,10)
+f
+tapply(x,f,mean)
+```
+
+
+---
+
+### mapply
+
+mapply() aplica una funcion a un grupo de listas (no solo a 1 como lapply).
+Recibe 4 argumentos: 
+
+* Una funcion (FUN) que se quiere aplicar
+* (...) argumentos que se transformaran en listas
+* MoreArgs si le quiero dar mas argumentos a la fucion FUN
+* simplify si quiero simplificar el resultado
+
+
+```{r f mapply, eval = FALSE}
+mapply(FUN,(...),MoreArgs,simplify)
+```
+
+#### Ejemplo 1:
+
+```{r ejemplo 1 mapply}
+x <- list(rep(1,4), rep(2,3), rep(3,2),rep(4,1))
+x
+mapply(rep,1:4,4:1)
+```
+
+---
+
+### split
+
+split() divide un vector/list/dataframe segun un factor 
+Recibe 4 argumentos: 
+
+* Un vector (x)
+* Factor f que indica las posiciones a cortar o grupos
+* Drop indica si hay un factor vacio este debe ser botado
+* (...) argumentos de la funcion
+
+
+```{r f split, eval = FALSE}
+split(x,f,INDEX,drop,...)
+```
+
+#### Ejemplo 1:
+
+```{r ejemplo 1 split}
+data_1 <- read.csv('hw1_data.csv', header = TRUE, nrows = 6)
+data_1
+data <- read.csv('hw1_data.csv', header = TRUE)
+s <- split(data, data$Month)
+sapply(s, function(x) colMeans(x[,c("Ozone","Solar.R","Wind")], na.rm = TRUE))
+```
+
+
+### Debbuging
+
+Los posibles errores de un programa se dividen en:
+
+* Message
+* Warning
+* Error
+* Condition (Son condiciones para saltar los 3 anteriores)
+
+Para rastrear los errores existen 5 funciones que podrian ayudar:
+
+* Traceback: Imprime las llamadas de las funciones que se llaman dentro de una funcion
+y donde ha ocurrido el error
+* Debug: Se le pasa como argumento una funcion, cada vez que esta funcion es llamada para en la primera linea y se puede ir navegando a traves de la funcion mas lentamente.
+* Browser: Es igual que Debug pero uno elige en que linea de una funcion ir mas lento y no desde el principio
+* Trace: Permite insertar un codigo de Debug o Browser pero sin modificar el codigo original (Generalmente usado para hacer Debug a un codigo que no es tuyo)
+* Recover: Puedes pausar la ejecucion de una funcion al momento que ocurre el error y rastrear este
+

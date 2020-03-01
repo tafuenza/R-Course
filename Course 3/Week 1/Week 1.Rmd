@@ -1,0 +1,108 @@
+---
+title: "Week 1"
+author: "tafuenza"
+date: "17-11-2019"
+output: word_document
+---
+
+
+# Chequear y crear directorios desde R
+
+Si quiero crear o chequear si existe una carpeta dentro de mi "work directory (wd)" debo usar:
+
+```{r comandos, eval = FALSE}
+file.exists("DirectoryName") # Chequea si el directorio existe
+dir.create("DirectoryName") # Crea el directorio si no existe
+```
+
+# Descargar archivos desde internet
+
+Para descargar un archivo directamente desde internet, debemos utilizar el siguiente codigo:
+
+```{r descargar archivos, eval = FALSE}
+download.file(fileURL, destfile, method) # URL, carpeta de destino y nombre de archivo (data/mydata.csv), method (Curl)
+```
+
+# Abrir Archivos
+
+El clasico archivo que se va a leer es un archivo .csv
+
+```{r leer archivo .csv, eval = FALSE}
+data <- read.csv(file,header,sep,row.names,row) # Archivo, si tiene o no titulo las variables, como estan separadas las columnas, si las filas tienen nombres, cuantas filas quiero leer
+data <- read.csv(quotes, na.strings, skip) # Si existen valores entre comillas, como se representan los NA, saltar algunas lineas desde el comienzo
+```
+
+
+# Xlsx
+
+```{r xlsx, eval = FALSE}
+
+library("xlsx"")
+data <- read.xlsx("data.xls", sheetIndex = 1, HEADER = TRUE, colIndex = 2:3, row.Index = 1:4)
+
+```
+
+# Paginas Web
+
+R permite leer directamente archivos de paginas web como XML
+
+```{r Archivos XML}
+library('XML')
+url <- "http://www.w3schools.com/xml/simple.xml"
+download.file(url, destfile = "foo.xml")
+doc <- xmlTreeParse("foo.xml", useInternal=TRUE)
+rootNode <- xmlRoot(doc)
+xmlName(rootNode)
+rootNode[[1]]
+rootNode[[1]][[1]]
+xmlSApply(rootNode,xmlValue)
+#Para encontrar otros datos especificos se puede usar
+#/node
+#//node
+#node[@attr-name]
+#node[@attr-name = 'bob']
+xpathSApply(rootNode,'//name',xmlValue)
+xpathSApply(rootNode,'//price',xmlValue)
+```
+
+# Abrir Json
+
+```{r json files}
+library('jsonlite')
+URL <- "https://api.github.com/users/jtleek/repos"
+data <- fromJSON(URL)
+names(data)
+names(data$owner) # Los data frame te permite tener dataframes unos dentro de otros
+# Tambien puedo transformar un DataFrame a JSON con toJSON()
+```
+
+#Data table
+
+Data.table() es capaz de hacer lo mismo que data.frame() pero tiene algunas opciones interesantes que pueden ser utiles
+
+```{r Datatable}
+library('data.table')
+set.seed(1)
+DT <- data.table( x = rnorm(10), y =  rbinom(10,1,0.5), z =  rpois(10,1))
+tables() ## Permite conocer algunas caracteristicas de la tabla de datos
+DT[2,]
+DT[c(2,3)] # Cuando le entrego un indice, siempre lo comprende como las filas
+DT[,c(2,3)] # Si lo tratas de hacer por columnas no funciona
+DT[,list(sum(x),mean(z))] # Le puedes entregar una lista de funciones que hacer por variable
+DT[,w := x^2] # Es mas eficiente al agregar nuevas variables
+DT[,m:= {tmp <-(x+z); log2(tmp+5)}] # Puedo crear funciones para agregar nuevas variables
+DT[,a:= x>0] # Comprobar logicas y agregar nueva variable
+DT[,b:= mean(x+w), by = a] # Calcula el promedio de todos los a = TRUE y lo de A = FALSE separados
+DT
+set.seed(2)
+DATA <- data.table(x=sample(letters[1:3], 1E5,TRUE))
+DATA[,.N, by = x] # Cuenta la cantidad de veces que se repite cada uno de los elementos de x
+DT <- data.table(x=rep(c("a","b","c"), each = 100), y= rnorm(300))
+setkey(DT,x)
+A <- DT['a'] ## Al asignar a x como la llave, al entregarle directamente algun cambio simplemente usa la llave
+A[1:10]
+
+
+
+
+```

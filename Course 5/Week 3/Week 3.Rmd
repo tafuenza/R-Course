@@ -1,0 +1,61 @@
+---
+title: "Week 3"
+author: "Tomás"
+date: "20 de febrero de 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###Communicating Results
+
+Un informe debe tener los argumentos precisos para presentarle a alguien que no puede ver todo el contenido.
+
+* Titulo / Autor
+* Abstract
+* Cuerpo / Resultados
+* Material de apoyo
+* Codigo, Data
+
+###RPubs
+
+Rpubs permite encontrar y publicar material en Rmarkdown de manera publica en un sitio web: www.rpubs.com.
+Los archivos .html pueden ser publicados automaticamente apretando el boton publish arriba a la derecha en Rpubs.
+
+###Reproducible Research Checklist (part 1)
+
+* Basura es basura, tienes que empezar con algo que te interese a ti y a otras personas
+* Generar una buena pregunta a los datos
+* Trabaja con persona que te lleves bien en el trabajo
+
+Cosas que no hay que hacer:
+
+* No edites a mano (Excel, u otros programas)
+* No editar tablas ni figuras
+* No descargues los archivos a mano (Si lo haces dejar instrucciones de como hacerlo)
+* No mover datos dentro del pc y tampoco cortar archivos muy grandes
+
+###Reproducible Research Checklist (part 2)
+
+Cosas que hay que hacer:
+
+* Enseñarle al pc siempre a hacer todo, no hacer nada a mano
+
+```{r eval = FALSE}
+download.file("http:\\archive.ics.uci.edu/ml/machine-learning-databases/00275/Bike-Sharing-Dataset.zip", "ProjectData/Bike-Sharing-Dataset.zp")
+```
+
+* Usa el control de version (Git)
+* Estate atento a tus ambiente de software (Arqutectura del computador, software, versions etc...)
+
+###Reproducible Research Checklist (part 3)
+
+* No guardes los outputs (Solamente cuando termines)
+* set.seed() para generar numeros random y no perder esos numeros y poder reproducir
+* Un analisis de datos no es algo corto (Raw Data -> Processed Data -> Analysis -> Report)
+
+###Evidence-based Data Analysis (part 1)
+
+* Un analisis debe ser replicable y reproducible

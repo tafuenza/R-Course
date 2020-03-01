@@ -1,0 +1,75 @@
+---
+title: "Week 4"
+author: "Tomás"
+date: "22 de noviembre de 2019"
+output: word_document
+---
+
+#Editing text variables
+
+```{r editing text variables}
+
+#Video 1
+
+data <- read.csv("Baltimore_Fixed_Speed_Cameras.csv")
+names(data)
+tolower(names(data)) # Deja todo en minuscula (se puede en mayuscula)
+splitnames <- strsplit(names(data), "\\.") #splitea un string
+splitnames[[6]][1]
+review <- data.frame( hola_chao = "hola", chao_hola = "chao")
+names(review)# Quiero quitar los "_"
+sub("_","",names(review)) #Quita los "_" y los cambia por nada "" (gsub() reemplaza todos y no solo el primero)
+grep("Alameda", data$intersection) # Busca las coincidencias y me entrega los indices
+grep("Alameda", data$intersection, value = TRUE) # Busca las coincidencias y me entrega los valores
+table(grepl("Alameda", data$intersection)) # Entre el numero de veces que aparece "Alameda"
+library (stringr)
+nchar("Jeffrey Leek") #Me da la cantidad de caracteres
+substr("Jefrey Leek",1,7) #Me da los caracteresd del 1 al 7
+paste("hola, Chao") #Pega strings
+paste0("hola","chao") #Pega sin espacios
+str_trim("Tomas      ") #Quita los espacios innecesarios
+```
+
+#Video 2
+## Metacaracteres
+Al buscar caracteres dentro de un texto puedo querer buscarlos de forma mas especifica que simplemente por la palabra:
+
+
+* ^Hola: Me busca todas las lineas que comienzen con Hola (Si esta en medio no lo identifica)
+* Hola$: Busca todas las frases que terminen con Hola
+* [Bb][Uu][Ss][Hh]: Busca la palabra "Bush" en todos sus formatos, independiente si es mayuscula o minuscula
+* ^[0-9][a-zA-Z]: Busca linea que comienzen con un numero del 0-9 y sigan con letras de la "a" a la "z"
+* [^?.]$: Busca linea que no terminen en "?" ni "."
+* 9.11: Busca cualquier frase que tenga un 9 seguido de cualquier caracter y despues un 11
+* flood|fire: Busca cualquiera de las dos palabras (pueden ser infinitos |)
+* ^([Gg]ood|[Bb]ad): Busca la palabra good o bad en un principio (El parentesis hace que "^" sea para ambos)
+* ^Hola (\.)?: Me busca la palabra Hola en el inicio y como alternativa el punto (Se pone el slash debido a que el punto simboliza cualquier metacaracter pero quiero que me busque el punto
+* (.*): Me busca cualquier cosas dentro de un parentesis repetido las veces que quiera
+* [Bb]( +(^ )+ +){1,5} debate: Busca la palabra bush, despues un espacio, seguido de algo que no es un espacio, otro espacio y la palabra debate que este separado por 1 a 5 veces esa combinacion
+* 
+
+#Video 3
+
+```{r Dates}
+date <- date()
+class(date)
+date1 <- Sys.Date()
+class(date1)
+format(date1, "%A %B %y") # Convierte la fecha a un formato que el programa entiende
+x <- c("1junio1960","2junio1960") ; x
+y <- as.Date(x,"%d%b%Y") ; y
+y[1] - y[2]
+weekdays(date1) # Dia
+months(date1) #Mes
+julian(date1) #Me entrega los dias desde el "origen"
+library(lubridate)
+#Solo sirve para pasar numeros a fechas
+ymd("20140108") #Convierte a fecha en el orden que le entrego (year,month,day)
+myd("11/2014.11") #(month,year,day), Le puedo entregar casi cualquier cosa entre medio
+ymd_hms("20140108 10:15:03") #Puedo agregarle la hora
+ymd_hms("20140108 10:15:03", tz="Pacific/Auckland") #Puedo agregarle la hora y la zona horaria
+
+
+
+
+```

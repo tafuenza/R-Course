@@ -1,0 +1,32 @@
+---
+title: "Assignment 4"
+author: "Tomás"
+date: "20 de febrero de 2020"
+output: html_document; word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Assignment 4
+
+First, you have to download the data from the following link:
+
+Data:
+[link](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2)
+
+There is also documentation on the data that you can find below:
+
+National Weather Service Storm Data Documentation
+[link](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2Fpd01016005curr.pdf)
+
+National Climatic Data Center Storm Events FAQ
+[link](https://d396qusza40orc.cloudfront.net/repdata%2Fpeer2_doc%2FNCDC%20Storm%20Events-FAQ%20Page.pdf)
+
+After downloading the unzip file and get the file repdata_data_StormData.csv
+
+```{r Data, cache = TRUE}
+data <- read.csv('repdata_data_StormData.csv', header = TRUE)
+names()
+```

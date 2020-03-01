@@ -1,0 +1,38 @@
+---
+title: "Week 2"
+author: "Tomás"
+date: "18 de noviembre de 2019"
+output: word_document
+---
+
+# SQL
+
+```{r SQL}
+library(DBI)
+library(RMySQL)
+ucscDB <- dbConnect(MySQL(),user = 'genome', host = 'genome-mysql.cse.ucsc.edu')
+result <- dbGetQuery(ucscDB,'show databases'); dbDisconnect(ucscDB)
+result ## Entrega una lista de todas las bases de datos disponibles en el host
+hg19 <- dbConnect(MySQL(),user = 'genome', host = 'genome-mysql.cse.ucsc.edu', db = 'hg19')
+allTables <- dbListTables(hg19)
+length(allTables)
+allTables[1:5] # Ejemplo especifico de una database que tiene mas de 10.000 data frames dentro
+dbListFields(hg19,'affyU133Plus2')
+dbGetQuery(hg19,'select count(*) from affyU133Plus2') ## Cuenta todas las filas que existen en la tabla affy....
+affydata <- dbReadTable(hg19, 'affyU133Plus2') # Retorna la dataframe affy... con esto puedo trabajarla
+class(affydata)
+head(affydata)
+query <- dbSendQuery(hg19, 'select * from affyU133Plus2 where misMatches between 1 and 3')
+affyMis <- fetch(query); quantile(affyMis$misMatches)
+affyMissmall <- fetch(query, n=10); dbClearResult(query);
+dbDisconnect(hg19)
+
+
+```
+
+# Read from web
+
+```{r Web}
+
+
+```
