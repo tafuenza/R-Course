@@ -1,0 +1,113 @@
+---
+title: "Week 1"
+author: "Tomás Fuenzalida"
+date: "29-02-2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Week 2
+
+Las diversas distribuciones tienen 4 comandos importantes.
+
+###dnorm (Funcion de densidad)
+
+Nos entrega la funcion de densidad.
+
+```{r dnorm}
+set.seed(1)
+dnorm(0 , mean = 0, sd = 1) #Probabilidad del quantil 0 con media 0 y sd 1
+z_scores <- seq(-3,3,.1); z_scores
+dvalues <- dnorm(z_scores) ; dvalues
+#http://seankross.com/notes/dpqr/
+
+plot(dvalues, # Plot where y = values and x = index of the value in the vector
+     xaxt = "n", # Don't label the x-axis
+     type = "l", # Make it a line plot
+     main = "pdf of the Standard Normal",
+     xlab= "Z-score") 
+
+# These commands label the x-axis
+axis(1, at=which(dvalues == dnorm(0)), labels=c(0))
+axis(1, at=which(dvalues == dnorm(1)), labels=c(-1, 1))
+axis(1, at=which(dvalues == dnorm(2)), labels=c(-2, 2))
+axis(1, at=which(dvalues == dnorm(0)), labels=c(0))
+axis(1, at=which(dvalues == dnorm(1)), labels=c(-1, 1))
+axis(1, at=which(dvalues == dnorm(2)), labels=c(-2, 2))
+```
+
+###pnorm(Funcion de densidad acumulada)
+
+Esta funcion entrega la funcion de densidad acumulada
+
+```{r pnorm}
+pnorm(2) #Probabilidad que el valor sea menor a 2
+pvalues <- pnorm(z_scores)
+
+# Now we'll plot these values
+plot(pvalues, # Plot where y = values and x = index of the value in the vector
+     xaxt = "n", # Don't label the x-axis
+     type = "l", # Make it a line plot
+     main = "cdf of the Standard Normal",
+     xlab= "Quantiles",
+     ylab="Probability Density") 
+
+# These commands label the x-axis
+axis(1, at=which(pvalues == pnorm(-2)), labels=round(pnorm(-2), 2))
+axis(1, at=which(pvalues == pnorm(-1)), labels=round(pnorm(-1), 2))
+axis(1, at=which(pvalues == pnorm(0)), labels=c(.5))
+axis(1, at=which(pvalues == pnorm(1)), labels=round(pnorm(1), 2))
+axis(1, at=which(pvalues == pnorm(2)), labels=round(pnorm(2), 2))
+
+
+```
+
+###qnorm (Nos entrega el valor del quantil de los quantiles)
+
+Esta funcion nos entrega el valor del quantil y no la probabilidad es la funcion
+inversa de pnorm
+
+```{r qnorm}
+qnorm(.96)
+# This is for getting two graphs next to each other
+oldpar <- par()
+par(mfrow=c(1,2))
+
+# Let's make a vector of quantiles: from 0 to 1 by increments of .05
+quantiles <- seq(0, 1, by = .05); quantiles
+# Now we'll find the Z-score at each quantile
+qvalues <- qnorm(quantiles); qvalues
+# Plot the z_scores
+plot(qvalues,
+     type = "l", # We want a line graph
+     xaxt = "n", # No x-axis
+     xlab="Probability Density",
+     ylab="Z-scores")
+
+# Same pnorm plot from before
+plot(pvalues, # Plot where y = values and x = index of the value in the vector
+     xaxt = "n", # Don't label the x-axis
+     type = "l", # Make it a line plot
+     main = "cdf of the Standard Normal",
+     xlab= "Quantiles",
+     ylab="Probability Density") 
+
+# These commands label the x-axis
+axis(1, at=which(pvalues == pnorm(-2)), labels=round(pnorm(-2), 2))
+axis(1, at=which(pvalues == pnorm(-1)), labels=round(pnorm(-1), 2))
+axis(1, at=which(pvalues == pnorm(0)), labels=c(.5))
+axis(1, at=which(pvalues == pnorm(1)), labels=round(pnorm(1), 2))
+axis(1, at=which(pvalues == pnorm(2)), labels=round(pnorm(2), 2))
+```
+
+###rnorm (Vector de numeros random)
+
+Esta funcion nos entrega un vector de numeros que siguen la distribucion señalada
+
+```{r}
+rnorm(5, mean = 0, sd = 1)
+
+```
