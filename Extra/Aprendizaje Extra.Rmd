@@ -92,3 +92,36 @@ ggplot(data2, aes(x = Precio, y = Value, fill = Plataforma)) + geom_col(position
         theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
         scale_fill_manual(values=c("red", "#E69F00", "#56B4E9"))
 ```
+
+##dcast
+
+Permite pasar de un formato de datos "largo"" a uno mas "ancho". Necesita:
+
+* Tabla
+* Columnas que poner en fila (Separadas por "+")
+* Columnas disponer en columnas (Depsues de "~")
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(reshape2)
+```
+
+```{r dcast}
+data <- data.frame(Provincia = c("Huesca", "Teruel", "Zaragoza", "Huesca", "Teruel", "Zaragoza")
+                   , Variables = c("Hombres","Hombres","Hombres","Mujeres","Mujeres","Mujeres")
+                   , Valor = c(100,110,120,130,140,150))
+aux <- dcast(data, Provincia ~ Variables) # se puede usar value.var para hacer "override"
+```
+
+##Mutate
+
+La funcion mutate me permite crear nuevas variables o editar las actuales en un dataframe
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+```
+
+```{r mutate}
+data <- data.frame(Value1 = c(1,2,3,4), Value2 = c(5,6,7,8)); data
+data <- mutate(data, add = Value1 + Value2); data
+data <- mutate(data, Value1 = Value2); data
+```

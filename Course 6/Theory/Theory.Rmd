@@ -1,0 +1,262 @@
+---
+title: "Week 1"
+author: "Tomás Fuenzalida"
+date: "29-02-2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Week 2
+
+Las diversas distribuciones tienen 4 comandos importantes.
+
+###dnorm (Funcion de densidad)
+
+Nos entrega la funcion de densidad.
+
+```{r dnorm}
+set.seed(1)
+dnorm(0 , mean = 0, sd = 1) #Probabilidad del quantil 0 con media 0 y sd 1
+z_scores <- seq(-3,3,.1); z_scores
+dvalues <- dnorm(z_scores) ; dvalues
+#http://seankross.com/notes/dpqr/
+
+plot(dvalues, # Plot where y = values and x = index of the value in the vector
+     xaxt = "n", # Don't label the x-axis
+     type = "l", # Make it a line plot
+     main = "pdf of the Standard Normal",
+     xlab= "Z-score") 
+
+# These commands label the x-axis
+axis(1, at=which(dvalues == dnorm(0)), labels=c(0))
+axis(1, at=which(dvalues == dnorm(1)), labels=c(-1, 1))
+axis(1, at=which(dvalues == dnorm(2)), labels=c(-2, 2))
+axis(1, at=which(dvalues == dnorm(0)), labels=c(0))
+axis(1, at=which(dvalues == dnorm(1)), labels=c(-1, 1))
+axis(1, at=which(dvalues == dnorm(2)), labels=c(-2, 2))
+```
+
+###pnorm(Funcion de densidad acumulada)
+
+Esta funcion entrega la funcion de densidad acumulada
+
+```{r pnorm}
+pnorm(2) #Probabilidad que el valor sea menor a 2
+pvalues <- pnorm(z_scores)
+
+# Now we'll plot these values
+plot(pvalues, # Plot where y = values and x = index of the value in the vector
+     xaxt = "n", # Don't label the x-axis
+     type = "l", # Make it a line plot
+     main = "cdf of the Standard Normal",
+     xlab= "Quantiles",
+     ylab="Probability Density") 
+
+# These commands label the x-axis
+axis(1, at=which(pvalues == pnorm(-2)), labels=round(pnorm(-2), 2))
+axis(1, at=which(pvalues == pnorm(-1)), labels=round(pnorm(-1), 2))
+axis(1, at=which(pvalues == pnorm(0)), labels=c(.5))
+axis(1, at=which(pvalues == pnorm(1)), labels=round(pnorm(1), 2))
+axis(1, at=which(pvalues == pnorm(2)), labels=round(pnorm(2), 2))
+
+
+```
+
+###qnorm (Nos entrega el valor del quantil de los quantiles)
+
+Esta funcion nos entrega el valor del quantil y no la probabilidad es la funcion
+inversa de pnorm
+
+```{r qnorm}
+qnorm(.96)
+# This is for getting two graphs next to each other
+oldpar <- par()
+par(mfrow=c(1,2))
+
+# Let's make a vector of quantiles: from 0 to 1 by increments of .05
+quantiles <- seq(0, 1, by = .05); quantiles
+# Now we'll find the Z-score at each quantile
+qvalues <- qnorm(quantiles); qvalues
+# Plot the z_scores
+plot(qvalues,
+     type = "l", # We want a line graph
+     xaxt = "n", # No x-axis
+     xlab="Probability Density",
+     ylab="Z-scores")
+
+# Same pnorm plot from before
+plot(pvalues, # Plot where y = values and x = index of the value in the vector
+     xaxt = "n", # Don't label the x-axis
+     type = "l", # Make it a line plot
+     main = "cdf of the Standard Normal",
+     xlab= "Quantiles",
+     ylab="Probability Density") 
+
+# These commands label the x-axis
+axis(1, at=which(pvalues == pnorm(-2)), labels=round(pnorm(-2), 2))
+axis(1, at=which(pvalues == pnorm(-1)), labels=round(pnorm(-1), 2))
+axis(1, at=which(pvalues == pnorm(0)), labels=c(.5))
+axis(1, at=which(pvalues == pnorm(1)), labels=round(pnorm(1), 2))
+axis(1, at=which(pvalues == pnorm(2)), labels=round(pnorm(2), 2))
+```
+
+###rnorm (Vector de numeros random)
+
+Esta funcion nos entrega un vector de numeros que siguen la distribucion señalada
+
+```{r}
+rnorm(5, mean = 0, sd = 1)
+
+```
+
+##Week 2
+
+###Data Sample
+
+Si quiero el percentil de una muestra de 100 personas de una distribucion normal, debo dividir la desviacion en la raiz
+de la muestra (sqrt(100))
+
+```{r Data Sample}
+qnorm(0.95, mean= 1100, sd = 75/sqrt(100))
+```
+
+##Week 3
+
+###T confidence intervals example
+
+Para comparar la efectividad de un remedio se puede hacer un test-t para saber si en promedio el remedio hace efecto,
+con t.test. El test-t se utiliza para comparar si las medias de dos grupos son iguales entre si. (Hipotesis nula medias son iguales)
+
+```{r T confidence intervals example}
+data(sleep)
+head(sleep)
+g1 <- sleep$extra[1:10]
+g2 <- sleep$extra[11:20]
+difference <- g2 - g1
+mn <- mean(difference)
+s <- sd(difference)
+n <- 10
+mn + c(-1, 1) * qt(0.975, n - 1) * s/sqrt(n)
+t.test(difference) #Como el intervalo no contiene al 0, se puede afirmar la hipotesis
+```
+
+###Independent group T intervals
+
+Lo mismo anterior pero para dos grupos independientes (Placebo y real)
+
+```{r Independent group T intervals}
+data(sleep)
+head(sleep)
+g1 <- sleep$extra[1:10]
+g2 <- sleep$extra[11:20]
+t.test(g2,g1, paired = FALSE, var.equal = TRUE) #Como el intervalo contiene al 0, se afirma la hipotesis nula
+```
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(reshape2)
+library(dplyr)
+```
+
+```{r Another Example}
+data("chickwts")
+wideCw <- dcast(ChickWeight, Diet + Chick ~ Time, value.var = "weight")
+names(wideCw)[-(1:2)] <- paste("time", names(wideCw)[-(1:2)], sep = "")
+wideCw <- mutate(wideCw, gain = time21 - time0)
+wide14 <- subset(wideCw, Diet %in% c(1,4))
+t.test(gain ~ Diet, paired = FALSE, var.equal = TRUE, data = wide14)$conf #Quiero explicar "gain" con la variable Diet,
+#Para esto debe tener solamente dos niveles ya que es una comparacion entre dos cosas
+t.test(gain ~ Diet, paired = FALSE, var.equal = FALSE, data = wide14)$conf #Aqui se asume que la varianza no es igual
+#Ya que el intervalo no contiene al 0, podemos decir que se gana menos peso en la dieta 1 que en la 4
+```
+
+###T tests
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(UsingR)
+```
+
+```{r  T tests}
+data(father.son)
+t.test(father.son$sheight, father.son$fheight, paired = TRUE) #Un padre, un hijo (PAIRED  = TRUE)
+#Como el intervalo no contiene al 0, se rechaza la hipotesis nula
+```
+
+### Two group testing
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(reshape2)
+library(dplyr)
+```
+
+```{r Two group testing}
+data("chickwts")
+wideCw <- dcast(ChickWeight, Diet + Chick ~ Time, value.var = "weight")
+names(wideCw)[-(1:2)] <- paste("time", names(wideCw)[-(1:2)], sep = "")
+wideCw <- mutate(wideCw, gain = time21 - time0)
+wide14 <- subset(wideCw, Diet %in% c(1,4))
+t.test(gain ~ Diet, paired = FALSE, var.equal = FALSE, data = wide14) #Busco explicar gain a traves de los grupos 1 y 4
+#de Diet por eso el "~" (Maximo 2 grupos), las personas del grupo 1 y 4 son disitntas (Paired =  FALSE), asumo que la
+#Varianza es distina
+#No contiene al 0, por lo que se rechaza la hipotesis nula
+#El valor T entrega cuantas veces de la desviacion estandar estoy movido
+```
+
+###Calculating Power
+
+"La potencia de una prueba estadística o el poder estadístico es la probabilidad de que la hipótesis nula sea rechazada cuando la hipótesis nula es falsa"
+
+El "poder" me permite saber la probabilidad de encontrar observaciones mas grandes con mayor certeza.
+Mientras mas observaciones tengo, la probabilidad de encontrar valores de mu mas grandes que la hipotesis nula es mas alta.
+Los valores extremos son cada vez mas faciles de encontrar
+
+```{r Calculating Power}
+mu0 <- 30
+mua <- 32
+n <- 16
+sigma  <- 4
+alpha <- 0.05
+z <- qnorm(1-alpha)
+pnorm(mu0 + z*sigma/sqrt(n), mean = mu0, sd = sigma/sqrt(n), lower.tail = FALSE)
+pnorm(mu0 + z*sigma/sqrt(n), mean = mua, sd = sigma/sqrt(n), lower.tail = FALSE) #Hay un 64% de probabilidad de detectar
+#una media de 32 o más si llevamos a cabo este experimento
+```
+
+
+![](C:/Users/Casa/Desktop/R Curso/R-Course/Course 6/Theory/Power.png)
+
+El poder es el area bajo la curva azul y a la derecha de la linea negra, que indica la probabilidad de rechazar la hipotesis nula si es que la curva azul es la correcta. La linea negra corresponde al punto donde la curva roja tiene acumulada un 5% de probabilidad.
+El otro lado de la curva azul es la probabilidad de un error tipo II.
+* Al hacer alpha mas pequeño hacemos que sea mas complicado rechazar la hipotesis nula, se necesita mas evidencia
+* Si disminuimos sigma y la variacion es pequeña, la probabilidad de rechazar la hipotesis nula aumenta
+* Mientras la hipotesis alternativa esta mas alejada de la nula, la probabilidad es mas alta
+* Si aumento n, la varianza disminuye por lo que el poder es mayor
+
+mua-mu0/sigma, es denominado "effect size"
+
+```{r power.t.test}
+power.t.test(n = 16, delta = 2/4, sd = 1, type = "one.sample", alt = "one.sided") #Delta es la diferencia entre los mu de las hipotesis nulas mua-mu0
+power.t.test(power = 0.8, delta = 2/4, sd = 1, type = "one.sample", alt = "one.sided")
+```
+
+
+###Bootstrapping
+
+"Se utiliza para aproximar la distribución en el muestreo de un estadístico. Se usa frecuentemente para aproximar el sesgo o la varianza de un análisis estadístico"
+
+Se usa para aproximar la distribucion estadistica de un muestreo a partir de un expermiento (Tirar el dado 50 veces, y hacerlo solamente una vez)
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(UsingR)
+```
+
+```{r Bootstrapping}
+data(father.son)
+x <- father.son$sheight
+n <- length(x)
+B <- 10000
+resamples <- matrix(sample (x, n*B, replace = TRUE), B,n) #Esto simula nuevamente los datos, con probabilidad 1/n cada uno de los datos
+resampledMedians <- apply(resamples,1,median)
+```
