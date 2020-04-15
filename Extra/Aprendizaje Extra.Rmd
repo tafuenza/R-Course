@@ -125,3 +125,22 @@ data <- data.frame(Value1 = c(1,2,3,4), Value2 = c(5,6,7,8)); data
 data <- mutate(data, add = Value1 + Value2); data
 data <- mutate(data, Value1 = Value2); data
 ```
+
+#Crear leyenda en un grafico
+
+Importante crear el color y las lineas en un "aes" para despues llamar a la funcion y poder identificar las diferentes lineas.
+
+```{r Leyenda}
+mexp = NULL
+lambda = 0.2
+for (i in 1 : 1000){
+        mexp = c(mexp, mean(rexp(40,lambda)))
+}
+sample_mean <- mean(mexp) ; setNames(c(sample_mean, 1/lambda),c("Sample Mean", "Theorical Mean"))
+sample_variance <- var(mexp); setNames(c(sample_variance, (1/lambda)^2),c("Sample Variance", "Theorical Variance"))
+data <- data.frame(name = c("Sample Mean", "Theorical Mean"), value = c(sample_mean, 1/lambda))
+ggplot() + aes(mexp) + geom_histogram(aes (y = ..density..),binwidth = 0.1, fill = "dodgerblue", color = "White") + 
+        geom_vline(data = data, mapping = aes(xintercept = value, color = c("mean", "median")), linetype = "dashed", size = 1) +
+        stat_function(fun = dnorm, aes(color = "Normal_Distribution"), args = list(mean = mean(mexp), sd = sd(mexp)), size = 1) +
+        scale_color_manual(name = "Legend", values = c(median = "red", mean = "black", Normal_Distribution = "green"))
+```

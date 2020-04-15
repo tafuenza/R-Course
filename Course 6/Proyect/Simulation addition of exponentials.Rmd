@@ -1,0 +1,49 @@
+---
+title: "Simulation addition of exponentials"
+author: "Tomás Fuenzalida"
+date: "14 de abril de 2020"
+output:
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+```
+
+##Simulation
+
+In the following report, a thousand simulations of 40 exponentials each will be analyzed. With the result, we will compare the sample mean and variance with the theoretical one. Finally, it will be verified graphically if a normal distribution can adapt well to the sample.
+
+In the following code, a thousand simulations of 40 numbers are carried out that follow an exponential distribution with parameter lambda = 0.2. With this we will create a vector of a thousand numbers, each of these numbers corresponds to the mean of each simulation
+```{r Simulation}
+set.seed(13)
+mexp = NULL
+lambda = 0.2
+for (i in 1 : 1000){
+        mexp = c(mexp, mean(rexp(40,lambda)))
+}
+```
+
+Then we calculate the mean and variance of the sample.
+
+```{r Median and variance}
+sample_mean <- mean(mexp) ; setNames(c(sample_mean, 1/lambda),c("Sample Mean", "Theorical Mean"))
+sample_variance <- var(mexp); setNames(c(sample_variance, (1/lambda)^2/40),c("Sample Variance", "Theorical Variance"))
+```
+
+In the two previous tables it can be seen that both the mean and the variance fit the theoretical with the sample, obtaining values close to 5 and 0.65 respectively
+
+```{r Plot}
+data1 <- data.frame(name = c("Sample Mean", "Theorical Mean"), value = c(sample_mean, 1/lambda))
+ggplot() + aes(mexp) + geom_histogram(aes (y = ..density..),binwidth = 0.1, fill = "dodgerblue", color = "White") + 
+        geom_vline(data = data1, mapping = aes(xintercept = value, color = c("Sample_Mean", "Theorical_Mean")), linetype = "dashed", size = 1) +
+        stat_function(fun = dnorm, aes(color = "Normal_Distribution"), args = list(mean = mean(mexp), sd = sd(mexp)), size = 1) +
+        scale_color_manual(name = "Legend", values = c(Sample_Mean = "red", Theorical_Mean = "black", Normal_Distribution = "green"))
+```
+
+Finally in the graph the green curve corresponds to a normal distribution of parameters mean = simulation mean and sd = simulation standard deviation. Visually it is possible to affirm that the normal distribution has a high relationship with the sum of exponentials, probably if infinite simulations were made it could better adjust

@@ -1,0 +1,73 @@
+---
+title: 'Tooth Growth: Supplements and Dosages'
+author: "Tomas Fuenzalida"
+date: "14 de abril de 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(ggpubr)
+```
+
+
+In the following report, we will briefly analyze R.'s "ToothGrowth" database. Then we will see if there is a significant difference between the supplements implemented and the doses ingested. Variance is assumed to be equal and observations are independent
+
+```{r Load data}
+data <- ToothGrowth
+data$dose <- as.factor(data$dose)
+head(data)
+summary(data)
+```
+
+First of all it is important to understand what each of the variables means:
+
+- Len: Tooth length
+- supp: Type of supplement used, can be {VC, OJ}
+- dose: Dose applied, can be {0.5,1,2}
+
+To better understand the data, a box plot will be made.
+
+```{r Plot}
+p <- ggplot(data = data, aes(x = supp, y = len )) + geom_boxplot(aes(fill=supp)) +  facet_wrap( ~ dose, scales = "free")
+p2 <- ggplot(data = data, aes(x = dose, y = len )) + geom_boxplot(aes(fill=dose)) +  facet_wrap( ~ supp, scales = "free")
+ggarrange(p,p2, ncol = 1, nrow = 2)
+```
+
+Visually with the previous graphs it can be concluded that for doses "2" there is no clear difference between the supplement "OJ" and "VC", for the other two doses longer teeth can be seen for the supplement "OJ".
+In the case of doses per supplement, it can be seen that for the "OJ" supplement there is a small difference between doses of 1 or 2 and that for the rest, the longer the dose, the longer the teeth
+
+Finally, test.t will be carried out to contrast the differences by dose and supplement in the following 9 tests:
+
+```{r Tests}
+t1 <- t.test(len ~ supp, data = data[data$dose == 0.5,], paired = FALSE, var.equal = TRUE)
+t2 <-t.test(len ~ supp, data = data[data$dose == 1,], paired = FALSE, var.equal = TRUE)
+t3 <- t.test(len ~ supp, data = data[data$dose == 2,], paired = FALSE, var.equal = TRUE)
+
+
+t4 <-t.test(len ~ dose, data = data[data$supp == "VC" & (data$dose == 0.5 | data$dose == 1),], paired = FALSE, var.equal = TRUE)
+t5 <-t.test(len ~ dose, data = data[data$supp == "VC" & (data$dose == 0.5 | data$dose == 2),], paired = FALSE, var.equal = TRUE)
+t6 <-t.test(len ~ dose, data = data[data$supp == "VC" & (data$dose == 1 | data$dose == 2),], paired = FALSE, var.equal = TRUE)
+
+t7 <-t.test(len ~ dose, data = data[data$supp == "OJ" & (data$dose == 0.5 | data$dose == 1),], paired = FALSE, var.equal = TRUE)
+t8 <-t.test(len ~ dose, data = data[data$supp == "OJ" & (data$dose == 0.5 | data$dose == 2),], paired = FALSE, var.equal = TRUE)
+t9 <-t.test(len ~ dose, data = data[data$supp == "OJ" & (data$dose == 1 | data$dose == 2),], paired = FALSE, var.equal = TRUE)
+```
+
+```{r Results, echo = FALSE}
+sprintf("Test 1: T Value = %f, Confidence Interval = [%f,%f] ", t1$statistic,t1$conf.int[1],t1$conf.int[2])
+sprintf("Test 2: T Value = %f, Confidence Interval = [%f,%f] ", t2$statistic,t2$conf.int[1],t2$conf.int[2])
+sprintf("Test 3: T Value = %f, Confidence Interval = [%f,%f] ", t3$statistic,t3$conf.int[1],t3$conf.int[2])
+sprintf("Test 4: T Value = %f, Confidence Interval = [%f,%f] ", t4$statistic,t4$conf.int[1],t4$conf.int[2])
+sprintf("Test 5: T Value = %f, Confidence Interval = [%f,%f] ", t5$statistic,t5$conf.int[1],t5$conf.int[2])
+sprintf("Test 6: T Value = %f, Confidence Interval = [%f,%f] ", t6$statistic,t6$conf.int[1],t6$conf.int[2])
+sprintf("Test 7: T Value = %f, Confidence Interval = [%f,%f] ", t7$statistic,t7$conf.int[1],t7$conf.int[2])
+sprintf("Test 8: T Value = %f, Confidence Interval = [%f,%f] ", t8$statistic,t8$conf.int[1],t8$conf.int[2])
+sprintf("Test 9: T Value = %f, Confidence Interval = [%f,%f] ", t9$statistic,t9$conf.int[1],t9$conf.int[2])
+```
+
+The null hypothesis is accepted in test 3 that there is no difference between the different supplements at doses of 2, as had been discussed in the graphic part. The null hypothesis is also accepted in the tests
