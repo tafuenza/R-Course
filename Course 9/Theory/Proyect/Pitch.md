@@ -59,6 +59,6 @@ How to use the app
 ========================================================
 
 The documentation tab has the instructions to use the app properly.
-The map, graph and data tabs provide information on the events that meet the criteria selected in the bar on the right side.
-[Shiny App](https://www.kaggle.com/usgs/earthquake-database)
-
+The map, graph and data tabs provide information on the events that meet the criteria selected in the bar on the right side  
+[Shiny App](https://tomas-fuenzalida.shinyapps.io/Proyect/)  
+[Github Code](https://github.com/tafuenza/R-Course/tree/master/Course%209/Theory/Proyect)
