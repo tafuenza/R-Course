@@ -1,0 +1,32 @@
+---
+title: "Plotly"
+author: "Tomas Fuenzalida"
+date: "4 de junio de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Plot
+
+In this graph, create random variables by class and configure a linear regression for each group
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(ggplot2)
+library(plotly)
+```
+
+```{r plot_ly}
+data <- data.frame(class = c(rep("Group1",50),rep("Group2",50),rep("Group3",50)),
+                   x = runif(150,0,10),
+                   y = c(rnorm(50,0,1),rnorm(50,1,2),rnorm(50,2,3)))
+
+fit <- lm(y ~ x + x*class, data = data) %>% fitted.values()
+
+data %>%
+        plot_ly(x = ~x, y = ~y, type = "scatter", mode = "markers", color = ~class) %>%
+        add_trace(x = ~x, y = ~fit, mode = "lines")
+
+```

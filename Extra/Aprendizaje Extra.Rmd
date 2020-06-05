@@ -126,7 +126,7 @@ data <- mutate(data, add = Value1 + Value2); data
 data <- mutate(data, Value1 = Value2); data
 ```
 
-#Crear leyenda en un grafico
+##Crear leyenda en un grafico
 
 Importante crear el color y las lineas en un "aes" para despues llamar a la funcion y poder identificar las diferentes lineas.
 
@@ -143,4 +143,32 @@ ggplot() + aes(mexp) + geom_histogram(aes (y = ..density..),binwidth = 0.1, fill
         geom_vline(data = data, mapping = aes(xintercept = value, color = c("mean", "median")), linetype = "dashed", size = 1) +
         stat_function(fun = dnorm, aes(color = "Normal_Distribution"), args = list(mean = mean(mexp), sd = sd(mexp)), size = 1) +
         scale_color_manual(name = "Legend", values = c(median = "red", mean = "black", Normal_Distribution = "green"))
+```
+
+##Melt
+
+Permite colapsar un dataframe
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(reshape2)
+```
+
+```{r melt}
+x = data.frame(
+        id   = c(1, 1, 2, 2),
+        blue = c(1, 0, 1, 0),
+        red  = c(0, 1, 0, 1)
+)
+
+# collapse the data frame
+melt(data = x, id.vars = "id", measure.vars = c("blue", "red"))
+```
+
+##Ifelse
+
+Me permite crear un vector con una condicion
+
+```{r ifelse}
+data <- data.frame(a = c(1,2,3,4,5,6,7), b = c(9,8,7,6,5,4,3))
+vector <- ifelse(data$a > 3, "Grande", "Chico"); vector
 ```

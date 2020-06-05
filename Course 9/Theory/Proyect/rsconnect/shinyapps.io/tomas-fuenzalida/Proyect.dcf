@@ -1,0 +1,13 @@
+name: Proyect
+title: Proyect
+username:
+account: tomas-fuenzalida
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2415420
+bundleId: 3234105
+url: https://tomas-fuenzalida.shinyapps.io/Proyect/
+when: 1591389070.76198
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData|data.csv|Pitch-rpubs.html|Pitch.md|Pitch.Rpres|Test.R|Pitch-figure/unnamed-chunk-2-1.png|Pitch-figure/unnamed-chunk-3-1.png

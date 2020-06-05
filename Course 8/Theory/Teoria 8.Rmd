@@ -1,0 +1,373 @@
+---
+title: "Curso 8"
+author: "Tomas Fuenzalida"
+date: "7 de mayo de 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##What is prediction?
+
+Queremos predecir cuando un email va a ser SPAM y cuando nop.
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(kernlab)
+library(caret)
+```
+
+##In and out of sample errors
+
+Son los errores de la toma de muestra o datos de entrenamiento y los errores de testeo
+
+```{r In and out of sample errors}
+data(spam); set.seed(133)
+smallSpam <- spam[sample(dim(spam)[1],size = 10),]
+spamLabel <- (smallSpam$type=="spam")*1 + 1
+plot(smallSpam$capitalAve, col = spamLabel)
+rule1 <- function(x){
+        prediction <- rep(NA, length(x))
+        prediction[x > 3] <- "spam"
+        prediction[x <= 3] <- "nonspam"
+        return(prediction)
+}
+table(rule1(smallSpam$capitalAve), smallSpam$type) #Podriamos crear reglas mas sofisticadas para hacer un match 100% pero pierde simplicidad el modelo
+sum(rule1(smallSpam$capitalAve)== smallSpam$type)
+table(rule1(spam$capitalAve), spam$type)
+sum(rule1(spam$capitalAve)== spam$type)
+```
+
+Hacer reglas mas precisas para capturar el ruido en pequeños set de data nos permite realizar predicciones mas precisas para esos datos pero resulta de un modelo sobreajustado que realizara peores predicciones para datos mas grandes. La idea es no capturar el ruido o la variacion de los datos.
+
+##Caret
+
+Es un paquete que contiene las tecnicas de machine learning que se utilizan comumente, para generar las predicciones con el comando predict debemos utilizar los siguientes input para cada tipo de tecnica.
+
+![](C:/Users/Casa/Desktop/R Curso/R-Course/Course 8/Theory/Screenshot_1.jpeg)
+
+```{r Caret, warning = FALSE}
+data(spam)
+inTrain <- createDataPartition(y = spam$type, p = 0.75, list = FALSE)
+training <- spam[inTrain,]
+testing <- spam[-inTrain,]
+set.seed(32342)
+modelFit <- train(type ~ ., data = training, method = "glm")
+modelFit #Elige el mejor modelo que se ajusta en este caso bootstrapp con resampling
+modelFit$finalModel
+predictions <- predict(modelFit, newdata = testing)
+confusionMatrix(predictions,testing$type )
+```
+
+
+##K-Folds
+
+Separa datos por K-Folds
+
+```{r K Folds}
+set.seed(1532523)
+folds <- createFolds(y = spam$type, k = 10, list = TRUE, returnTrain = TRUE) #Me entrega el train si eligo false me entra el test
+sapply(folds,length)
+```
+
+##Resample
+
+Separa datos por Resample, este metodo puede repetir observaciones
+
+```{r Resample}
+set.seed(1532523)
+samples <- createResample(y = spam$type, times = 10, list = TRUE)
+sapply(samples,length)
+```
+
+#Timeslices
+
+Separa datos por Timeslices, busco predecir los datos a traves de ventanas de tiempo. Con el siguiente codigo quiero utilizar 20 datos para predecir los 10 siguientes
+
+```{r Timeslices}
+set.seed(1532523)
+tme <- 1:1000
+timeslices <- createTimeSlices(y = tme, initialWindow = 20, horizon = 10)
+names(timeslices)
+timeslices$train[[1]]
+timeslices$test[[1]]
+```
+
+##Training Options
+
+Son las opciones que le puedo entregar a la funcion train(), cuando la llamo sin especificaciones usa los comandos por default.
+
+* preProcess: Realiza el pre procesamiento de los datos (detallado mas adelante)
+* weights: Le da mas peso a unas observaciones que a otras (Esto sirve cuando tengo muchas observaciones de un tipo y no del otro, como por ejemplo, accidentes aereos)
+* metric: Son las funciones objetivo que trata el modelo. En caso de funciones categoricas es maximizar "Accuracy", en caso de continuas es minimizar el RMSE
+* trControl: Se le entrega la funcion trainControl() (Especificado mas adelante)
+
+```{r Training Options}
+args(trainControl)
+```
+
+* method = El metodo con el que quiero hacer resampling de la data (bootstrapping, cross-validation)
+    + boot = bootstraping
+    + boot632 = bootstrapping con ajuste
+    + cv = cross-validation
+    + repeatedcv = cross-validation repetidamente
+    + LOOCV = leave one out cross-validation
+* number = Numero de veces de hacer el method anterior
+    + Para boot/cv
+    + Numero de subsamples que quiero tomar
+* repeats = Numero de repeticiones de todo lo anterior
+    + Numero de veces que quiero repetir el subsampling
+    + Si son muchos datos esto puede hacer todo mas lento
+* p = Tamaño del training set
+
+#Plotting predictors
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(ISLR); library(ggplot2); library(caret)
+```
+
+```{r Plotting predictors}
+data(Wage)
+inTrain <- createDataPartition(y = Wage$wage, p = 0.7, list = FALSE)
+training <- Wage[inTrain,]
+testing <- Wage[-inTrain,]
+featurePlot(x=training[,c("age","education","jobclass","health")], y = training$wage, plot = "pairs")
+```
+
+##Basic preprocessing
+
+```{r Basic preprocessing}
+data(spam)
+inTrain <- createDataPartition(y = spam$type, p = 0.75, list = FALSE)
+training <- spam[inTrain,]
+testing <- spam[-inTrain,]
+hist(training$capitalAve, main = "", xlab = "ave. capital run length")
+mean(training$capitalAve); sd(training$capitalAve) #Tiene demasiada desviacion estandar
+#Estandarizar
+trainCapAve <- training$capitalAve
+trainCapAveS <-(trainCapAve - mean(trainCapAve))/sd(trainCapAve)
+mean(trainCapAveS); sd(trainCapAveS) #La media y desviacion son 0 y 1
+#Si hago esto en el test set debo estandarizar por los mismo parametros que el training set
+
+testCapAve <- testing$capitalAve
+testCapAveS <-(testCapAve - mean(trainCapAve))/sd(trainCapAve)
+mean(testCapAveS); sd(testCapAveS)
+
+preObj <- preProcess(training[,-58], method = c("center","scale"))
+trainCapAveS <- predict(preObj, training[,-58])$capitalAve
+mean(trainCapAveS); sd(trainCapAveS)
+trainCapAveS <- predict(preObj, testing[,-58])$capitalAve
+mean(trainCapAveS); sd(trainCapAveS)
+#Se puede integrar directamente a la funcion train()
+```
+Existen distinto metodos aparte de "scale, center":
+
+* Boxcox: Intenta que los datos se parezcan lo mas normal posible
+* knnImpute: Permite lidiar con los valores faltantes en la base de datos busca los vectores que se parecen mas al que me falta y saca un promedio de estos
+
+##Covariate creation
+
+```{r Covariate creation }
+data(Wage)
+inTrain <- createDataPartition(y = Wage$wage, p = 0.7, list = FALSE)
+training <- Wage[inTrain,]
+testing <- Wage[-inTrain,]
+dummies <- dummyVars(wage ~ jobclass, data = training)
+head(predict(dummies, newdata = training))
+```
+
+###Removing zero covariates
+
+```{r Covariate creation2 }
+nsv <- nearZeroVar(training,saveMetrics = TRUE); nsv
+```
+
+
+##Preprocessing with principal components analysis
+
+La idea de esto es reducir el numero de predictores que tienen la misma "informacion", a traves de su correlacion.
+El PCA busca hacer una combinacion lineal o no lineal de los predictores para capturar la mayor informacion posible.
+* Reduce el nivel de predictores
+* Reduce el ruido de los datos
+
+```{r Preprocessing with principal components analysis}
+data(spam)
+inTrain <- createDataPartition(y = spam$type, p = 0.75, list = FALSE)
+training <- spam[inTrain,]
+testing <- spam[-inTrain,]
+M <- abs(cor(training[,-58]))
+diag(M) <- 0
+which(M > 0.8, arr.ind = TRUE)
+names(spam)[c(34,32)]
+plot(spam[,34],spam[,32]) #Podemos ver que hay una relacion 1-1 (probablemente esto sea un numero de telefono)
+
+smallSpam <- spam[,c(34,32)]
+prComp <- prcomp(smallSpam)
+plot(prComp$x[,1],prComp$x[,2])
+prComp$rotation #Entrega los beta del PCA
+```
+
+###PCA with Caret
+
+```{r PCA with Caret}
+typeColor <- ((spam$type == "spam")*1+1)
+preProc <- preProcess(log10(spam[,-58]+1), method = "pca", pcaComp = 2)
+spamPC <- predict(preProc, log10(spam[,-58]+1))
+plot(spamPC[,1],spamPC[,2], col = typeColor)
+```
+
+####Ejemplo
+
+```{r PCA with Caret2}
+preProc <- preProcess(log10(spam[,-58]+1), method = "pca", pcaComp = 2)
+trainPC <- predict(preProc, log10(training[,-58]+1))
+trainPC$type <- as.factor(training$type)
+mod <- train(type ~ ., method = "glm", data = trainPC, family = "binomial")
+testPC <- predict(preProc, log10(testing[,-58]+1))
+confusionMatrix(testing$type, predict(mod,testPC))
+```
+
+Puedo utilizar directamente train y usar "pca"
+
+```{r PCA with Caret2}
+mod2 <- train(type ~ ., method = "glm", preProcess = "pca", data = training)
+confusionMatrix(testing$type, predict(mod2,testing))
+```
+
+##Predicting with trees
+
+El algoritmo busca crear un arbol que separe las decisiones dependiendo de ciertas caracterizticas de las variables en "hojas", estas hojas contienen ciertas condiciones y nos entregan informacion de lo que queremos predecir
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(rattle)
+```
+
+```{r Predicting with trees}
+data(iris); names(iris)
+table(iris$Species)
+inTrain <- createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+qplot(Petal.Width, Sepal.Width, colour = Species, data = training) #Podemos ver una clara diferencia entre las especies
+
+model <- train(Species ~ . , method = "rpart", data = training) #rpart es para hacer arboles de regresion
+print(model$finalModel) #Se puede ver por ejemplo que si el largo es menor a 2.45 es "setosa"
+plot(model$finalModel, unirform = TRUE, main = "Arbol de Clasificacion")
+text(model$finalModel, use.n = TRUE, all = TRUE, cex = .8)
+#Una mejor clasificacion o arbol puede usarse con el paquete de rattle
+fancyRpartPlot(model$finalModel)
+predict(model, newdata = testing)
+```
+
+##Bagging
+
+Esta tecnica permite crear algoritmos (de arbol generalmente) con menor variacion ya que genera varios modelos y promedia los resultados lo que nos genera una menor varianza pero mantiene el bias. (method = "bagEarth", "treebag", "bagFAD")
+
+##Random Forest
+
+Rnadom forest es una extension del bagging (generar muchos modelos y promediarlos), para los arboles de clasificacion. La diferencia es que cuando separamos los datos con bootstrap tambien hacemos boostrap a las variables. Con esto hacemos distintos tipos de arboles con distintas variables. Nos entrega mejor accuracy, tiene problemas de velocidad, interpretabilidad y estar sobreajustado (es importante usar validacion cruzada para este metodo).
+Cada arbol debe se creado por un boostrap (una muestra aleatoria de la muestra), y en cada nodo se elige una cantidad de variables distintas.
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE}
+library(randomForest)
+```
+
+```{r Random Forests}
+data(iris); names(iris)
+inTrain <- createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+model <- train(Species ~ ., data = training, method = "rf", prox = TRUE) #rf de "random forest"
+model
+getTree(model$finalModel, k = 2)
+```
+
+##Boosting
+
+Se comienzan con tecnicas simple de prediccion, luego se les confiere un peso mas relevante a las observaciones que no han sido tomadas por las tecnicas y asi sucesivamente. Finalmente con cada peso calculado por el error creo un modelo final que me permita encontrar la mejor prediccion posible (El algoritmo mas famoso es el Adaboost).
+
+```{r Boosting}
+data(Wage); names(Wage)
+Wage <- subset(Wage, select = -c(logwage))
+inTrain <- createDataPartition(y = Wage$wage, p = 0.7, list = FALSE)
+training <- Wage[inTrain,]
+testing <- Wage[-inTrain,]
+model <- train(wage ~ ., method = "gbm", data = training, verbose = FALSE) ## GBM is boosting with trees
+print(model)
+```
+
+##Model Based Prediction
+
+La idea basica es que los datos siguen un modelos probabilistico (normal por ejemplo), luego se usa el teorema de bayes para encontrar los clasificadores optimos de ese modelo probabilistico.
+Las ventajas es que se aprovechan de la estructura de los datos, puede ser conveniente computacionalmente, se ajusta razonablemente a problemas reales.
+Las desventajas es que hay que asumir un modelo de la data, si el model es incorrecto el accuracy baja mucho
+
+```{r Model Based Prediction}
+data(iris); names(iris)
+inTrain <- createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+model1 <- train(Species ~ . , data = training, method = "lda")# linear discimination analysis
+model2 <- train(Species ~ . , data = training, method = "nb") #Naive base classification
+plda <- predict(model1,testing); pnb <- predict(model2, testing)
+table(plda,pnb)
+```
+
+##Regularized Regression
+
+La idea es generar una regresion lineal y penalizar o encoger los coefficientes que sean muy grandes. Esto nos permite mejorar el trade off de bias con varianza. Por ejemplo dos variables que esten muy correlacionadas si incluyo una tengo menos varianza pero mucho bias y pierdo informacio, si "penalizo" una e incluyo las dos puedo encontrar un punto de equilbibiro. Se necesitan data sets muy grandes para que funcione y en general no funciona tan bien como random forests o boosting.
+Los metodos posibles para esto son ridge, lasso, y relaxo.
+
+##Combining Predictors
+
+La idea es combinar tecnicas para generar mejores resultados (boosting + random forest + regresion lineal)
+
+```{r Combining Predictors}
+data(Wage); names(Wage)
+Wage <- subset(Wage, select = -c(logwage))
+inBuild <- createDataPartition(y = Wage$wage, p = 0.7 , list = FALSE)
+validation <- Wage[-inBuild,]; buildData <- Wage[inBuild,]
+inTrain <- createDataPartition(y = buildData$wage, p = 0.7, list = FALSE)
+training <- buildData[inTrain,]; testing <- buildData[-inTrain,]
+mod1 <- train(wage ~ ., method ="glm", data = training)
+mod2 <- train(wage ~ ., method ="rf", data = training, trControl = trainControl(method = "cv"))
+
+pred1 <- predict(mod1, testing); pred2 <- predict(mod2,testing)
+qplot(pred1,pred2,colour = wage, data= testing)
+
+predDF <- data.frame(pred1,pred2,wage = testing$wage)
+combModFit <- train(wage ~ ., method = "gam", data = predDF)
+combPred <- predict(combModFit,predDF)
+
+#Predict en el set de validacion
+
+pred1V <- predict(mod1,validation); pred2V <- predict(mod2,validation)
+predVDF <- data.frame(pred1 = pred1V, pred2 = pred2V)
+combPredV <- predict(combModFit, predVDF)
+```
+
+##Forecasting
+
+Es un metodo que incluye la dependencia temporal de las variables. Puede ser capaz de adquirir tendencias, patronces de temporadas, cilos.
+Es complicado hacer un subset de train y test. Los datos dependen de los anteriores cercanos y no lejanos.
+
+##Unsupervised Prediction
+
+La idea es predecir algo quee no se conoce, anteriormente siempre predeciamos sabiendo el outcome
+
+La idea es crear clusters, nombrarlo y hacer predictores para esos clusters. En una nueva data set, predecir a que cluster pertenence cada observacion
+
+```{r Unsupervised Prediction}
+data(iris); names(iris)
+inTrain <- createDataPartition(y = iris$Species, p = 0.7, list = FALSE)
+training <- iris[inTrain,]
+testing <- iris[-inTrain,]
+kMeans1 <- kmeans(subset(training, select = -c(Species)), centers = 3)
+training$clusters <- as.factor(kMeans1$cluster)
+qplot(Petal.Width, Petal.Length, colour = clusters, data= training)
+table(kMeans1$cluster, training$Species)
+
+mod <- train(clusters ~ ., data = subset(training, select = -c(Species)), method = "rpart")
+table(predict(mod,training), training$Species)
+```

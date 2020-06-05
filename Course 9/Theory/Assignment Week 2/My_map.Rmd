@@ -1,0 +1,23 @@
+---
+title: "My Country"
+author: "Tomas Fuenzalida"
+date: "3 de junio de 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##June 03, 2020
+
+On the following map find marks of some of the main cities of Chile
+
+```{r my_map}
+library(leaflet)
+my_city <- data.frame(lng = c(-70.6506,-71.5518265,-72.5984192,-70.2979202),
+                      lat= c(-33.4327,-33.0245705,-38.7396507,-18.4745998),
+                      Cities = c("Santiago", "Viña del Mar", "Temuco", "Arica")) 
+my_map <- my_city %>% leaflet %>% addTiles() %>%  addCircleMarkers(popup = ~as.character(Cities))
+my_map
+```

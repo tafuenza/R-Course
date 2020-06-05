@@ -1,0 +1,88 @@
+---
+title: "Automatic or Mechanical, which one to choose?"
+author: "Tomas Fuenzalida"
+date: "4 de mayo de 2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+##Introduction
+
+In this report, a complete analysis of the "mtcars" data that is part of the R program will be performed. In this report, we will fit a linear regression model to explain the difference between the mpg (miles per gallon) of mechanical and manual automobiles.
+
+##Summary
+
+Performing a full scan to find the difference between mechanical and manual cars in mpg, it was found that the relevant variables for this study were weight (wt), transmission type (am), and car acceleration (qsec). With this adjusted model it was found that for automatic models we reach 3mpg on average than for mechanical models
+
+```{r, results='hide', error = FALSE, warning=FALSE, message=FALSE, include = FALSE}
+library(ggplot2)
+library(car)
+library(psych)
+data("mtcars")
+head(mtcars)
+{mtcars$cyl <- as.factor(mtcars$cyl); mtcars$vs <- as.factor(mtcars$vs); mtcars$am <- as.factor(mtcars$am)}
+```
+
+First, an exploratory analysis of the data is carried out to understand these in order to obtain a good starting point
+
+```{r echo = FALSE, warning = FALSE}
+describeBy(mtcars)
+```
+
+It is important to see that in the data there are 3 variables that are transformed into a factor, which are included in its name *.
+
+```{r Plot, echo = FALSE, fig.align="center"}
+{g <- ggplot(aes(x = am, y = mpg), data = mtcars)
+        g <- g + geom_boxplot(aes(fill = am)) + labs( title = "MPG by transmission type", x = "Transmission Type", y = "MPG")
+        g <- g + scale_fill_discrete(name = "Transmission \nType", labels = c("Manual", "Automatic"))
+        g <- g + theme(plot.title = element_text(hjust = 0.5)) ; g}
+```
+
+As can be seen in the graph above, there is a relationship between the mpg of a car and its transmission, but the possible presence of other variables that may influence the mpg of a car should not be ruled out. That is why we will start by performing a simple linear regression with all the variables to search for possible new relationships.
+
+```{r Correlacion, echo = FALSE}
+data <- mtcars[,-c(2,8,9)]
+cor(data)
+```
+
+In the correlation matrix it can be seen that the variables "disp", "hp", "drat" and "wt" have high correlation with each other, so it is important to take this into account when fitting a linear regression model
+
+```{r Fit all Variables}
+fit1 <- lm(mpg ~ ., data = mtcars)
+vif(fit1)
+```
+
+Taking into account the VIF and the characteristics of the variables, we started our linear regression model including the "am", "hp" and "qsec" vairbals, hoping that they could fit better.
+
+
+```{r Linear Regression}
+fit2 <- lm(mpg ~ am + hp + qsec, data = mtcars)
+fit3 <- update(fit2, mpg ~ am + hp + qsec + cyl)
+fit4 <- update(fit3, mpg ~ am + hp + qsec + cyl + wt)
+anova(fit2,fit3,fit4)
+summary(fit4)$coeff
+```
+
+Although the ANOVA function suggests that we include the variable "cyl", the coefficients when performing the regression give us that "cyl" is not very significant, so we will remove it from the regression.
+
+```{r Final LR}
+fit6 <- lm(mpg ~ am + qsec + wt, data = mtcars)
+summary(fit6)$coeff
+```
+
+Finally iterating we come to the conclusion that mpg is described by "am", "qsec" and "wt".
+
+```{r plot LR}
+par(mfrow = c(2,2))
+plot(fit6)
+```
+
+In the first plot we can see that there is no clear pattern so it fits well
+The second plot suggests that the errors conform to normal apparently.
+The third we find points apparently randomly distributed, which suggests a homocedastic and bias-free model
+Finally, the fourth is that there are no points that have such a significant impact on the regression, so it confers a good fit.
+
+
+The model gives us that there is a difference of approximately 3 mpg of difference between automatic and manual models. Also that the more acceleration the more MPG at a ratio of 1.22. Finally every 1000lbs more about 4 MPG is lost

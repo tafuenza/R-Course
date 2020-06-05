@@ -1,0 +1,46 @@
+Shiny Application and Reproducible Pitch
+========================================================
+author: Tomás Fuenzalida
+date: 05/06/220
+autosize: FALSE
+
+Shiny App, Earthquakes on Earth
+
+The application
+========================================================
+
+The data set of the kaggle website on earthquakes in the world is used to create an interactive website that allows to filter earthquakes by different parameters to see them on a real map
+
+
+Data Collect
+========================================================
+
+Para la aplicacion se utilizo la informacion de sismos del sitio web:
+[Dataset](https://www.kaggle.com/usgs/earthquake-database)
+
+```{r, echo = FALSE}
+library(lubridate)
+data<- read.csv("database.csv", header = TRUE, sep = ","); data <- data[,c(1,3,4,5,6,9)]
+data$Date <- mdy(data$Date); data <- na.omit(data)
+data$Latitude <- as.integer(data$Latitude); data$Longitude <- as.integer(data$Longitude)
+head(data)
+```
+
+
+Linear Regresion
+========================================================
+
+```{r, echo =  FALSE}
+data<- read.csv("database.csv", header = TRUE, sep = ","); data <- data[,c(1,3,4,5,6,9)]
+data$Date <- mdy(data$Date); data <- na.omit(data)
+data$Latitude <- as.integer(data$Latitude); data$Longitude <- as.integer(data$Longitude)
+summary(lm(Magnitude ~ Depth, data = data))
+```
+
+How to use the app
+========================================================
+
+The documentation tab has the instructions to use the app properly.
+The map, graph and data tabs provide information on the events that meet the criteria selected in the bar on the right side.
+[Shiny App](https://www.kaggle.com/usgs/earthquake-database)
+

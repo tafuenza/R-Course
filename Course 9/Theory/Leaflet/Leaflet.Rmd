@@ -1,0 +1,96 @@
+---
+title: "Leaflet"
+author: "Tomas Fuenzalida"
+date: "2 de junio de 2020"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+##Leaflet
+
+###Primer Mapa
+
+Permite la creacion de graficos con mapas y otras cosas al igual que googlevis
+
+```{r, eval = FALSE}
+library(leaflet)
+my_map <- leaflet() %>% addTiles()
+#La notacion %>% (piping) entrega el output "my_map" como el primer elemento de la siguiente funcion
+my_map
+```
+
+###Add Marks
+
+```{r, eval = FALSE}
+my_map <- my_map %>% addMarkers(lat = 39.2980803, lng = -76.5898801, popup = "Jeff Leek Offices")
+my_map
+```
+
+###Add Various points
+
+```{r, eval = FALSE}
+set.seed(2016-04-25)
+df <- data.frame(lat = runif(20, min = 39.2, max  = 39.3),
+                 lng = runif(20, min = -76.7, max = -76.5),
+                 popup = 1:20)
+df %>%
+        leaflet() %>% 
+        addTiles() %>% 
+        addMarkers(popup = ~as.character(popup))
+```
+
+## Making Custom Marks
+
+```{r, echo=FALSE}
+hopkinsIcon <- makeIcon(
+  iconUrl = "http://brand.jhu.edu/content/uploads/2014/06/university.shield.small_.blue_.png",
+  iconWidth = 31*215/230, iconHeight = 31,
+  iconAnchorX = 31*215/230/2, iconAnchorY = 16
+)
+
+hopkinsLatLong <- data.frame(
+  lat = c(39.2973166, 39.3288851, 39.2906617, 39.2970681, 39.2824806),
+  lng = c(-76.5929798, -76.6206598, -76.5469683, -76.6150537, -76.6016766))
+
+hopkinsLatLong %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(icon = hopkinsIcon)
+```
+
+## Adding Multiple Popups
+
+```{r, echo=FALSE}
+hopkinsSites <- c(
+  "<a href='http://www.jhsph.edu/'>East Baltimore Campus</a>",
+  "<a href='https://apply.jhu.edu/visit/homewood/'>Homewood Campus</a>",
+  "<a href='http://www.hopkinsmedicine.org/johns_hopkins_bayview/'>Bayview Medical Center</a>",
+  "<a href='http://www.peabody.jhu.edu/'>Peabody Institute</a>",
+  "<a href='http://carey.jhu.edu/'>Carey Business School</a>"
+)
+
+hopkinsLatLong %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(icon = hopkinsIcon, popup = hopkinsSites)
+```
+
+## Mapping Clusters
+
+Sometimes you might have so many points on a map that it
+doesn't make sense to plot every marker. In these situations
+leaflet allows you to plot clusters of markers using
+`addMarkers(clusterOptions = markerClusterOptions())`. When
+you zoom in to each cluster, the clusters will separate until
+you can see the individual markers.
+
+```{r, eval=FALSE}
+df <- data.frame(lat = runif(500, min = 39.25, max = 39.35),
+                 lng = runif(500, min = -76.65, max = -76.55))
+df %>% 
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(clusterOptions = markerClusterOptions())
